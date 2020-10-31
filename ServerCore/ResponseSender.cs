@@ -1,4 +1,5 @@
 ﻿using ServerEntities;
+using ServerEntities.Logging;
 
 using System;
 using System.Collections.Generic;
@@ -6,11 +7,11 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 
-namespace SedcServer
+namespace ServerCore
 {
     public class ResponseSender
     {
-        static public void SendResponse(NetworkStream stream, Response response)
+        static public void SendResponse(NetworkStream stream, Response response, ILogger logger)
         {
             var statusLine = $"HTTP/{response.Version} {response.Status} {response.Message}";
             var headersLines = GetHeaderLines(response.Headers);
@@ -21,7 +22,7 @@ namespace SedcServer
                 content += Environment.NewLine + response.Body;
             }
 
-            Console.WriteLine(content);
+            logger.Debug(content);
             var contentBytes = Encoding.ASCII.GetBytes(content);
             stream.Write(contentBytes);
             stream.Close();

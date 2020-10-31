@@ -1,4 +1,6 @@
-﻿using System;
+﻿using ServerEntities.Logging;
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,9 +10,16 @@ namespace ServerEntities
 {
     public class RequestParser
     {
+        public ILogger Logger { get; set; }
+
+        public RequestParser(ILogger logger)
+        {
+            Logger = logger;
+        }
+
         public Request Parse(string requestData)
         {
-            Console.WriteLine(requestData);
+            Logger.Debug(requestData);
 
             var lines = requestData.Split(Environment.NewLine);
 
@@ -18,7 +27,9 @@ namespace ServerEntities
             var requestRegex = new Regex(@"^([A-Z]+) (.+) HTTP\/(.*)$");
             var match = requestRegex.Match(requestLine);
             var method = match.Groups[1].Value;
+
             var uri = match.Groups[2].Value;
+
             var version = match.Groups[3].Value;
 
             var headerLines = lines.Skip(1).TakeWhile(line => !string.IsNullOrEmpty(line));
@@ -61,3 +72,10 @@ namespace ServerEntities
         }
     }
 }
+
+
+// DEBUG
+// INFO
+// WARNING
+// ERROR
+// FATAL

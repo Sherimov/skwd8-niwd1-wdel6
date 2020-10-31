@@ -1,4 +1,6 @@
-﻿using SedcServer.Engine;
+﻿using ServerCore;
+
+using ServerEntities.Logging;
 
 using System;
 using System.Net;
@@ -14,29 +16,13 @@ namespace SedcServer
         {
             var address = IPAddress.Loopback;
             var port = 668;
+            
+            var logger = new CompositeLogger(new ConsoleLogger(LogLevel.Info), new FileLogger("log.txt"));
+            logger.Add(new FileLogger("other-log.txt", LogLevel.Error));
 
-            TcpListener listener = new TcpListener(address, port);
-            listener.Start();
-            Console.WriteLine("Started listening");
+            var server = new WebServer(address, port, logger);
 
-            while (true) {
-                Console.WriteLine("Waiting for request");
-                var client = listener.AcceptTcpClient();
-                Console.WriteLine("Client connected");
-                var stream = client.GetStream();
-
-                // Step 1: Accept the request and get the data
-                var request = RequestGetter.GetRequest(stream);
-
-                // Step 2: Transform the request object into a response object
-                var response = ServerEngine.Process(request);
-
-                // Step 3: Sent the response data and close the request
-                ResponseSender.SendResponse(stream, response);
-
-                Console.WriteLine("Sent response");
-                client.Close();
-            }
+            server.Run();
 
         }
     }
